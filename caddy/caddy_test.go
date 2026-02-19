@@ -512,7 +512,9 @@ func TestMetrics(t *testing.T) {
 	// Fetch metrics
 	resp, err := http.Get("http://localhost:2999/metrics")
 	require.NoError(t, err, "failed to fetch metrics")
-	defer resp.Body.Close()
+	t.Cleanup(func() {
+		require.NoError(t, resp.Body.Close())
+	})
 
 	// Read and parse metrics
 	metrics := new(bytes.Buffer)
@@ -585,7 +587,9 @@ func TestWorkerMetrics(t *testing.T) {
 	// Fetch metrics
 	resp, err := http.Get("http://localhost:2999/metrics")
 	require.NoError(t, err, "failed to fetch metrics")
-	defer resp.Body.Close()
+	t.Cleanup(func() {
+		require.NoError(t, resp.Body.Close())
+	})
 
 	// Read and parse metrics
 	metrics := new(bytes.Buffer)
@@ -677,7 +681,9 @@ func TestNamedWorkerMetrics(t *testing.T) {
 	// Fetch metrics
 	resp, err := http.Get("http://localhost:2999/metrics")
 	require.NoError(t, err, "failed to fetch metrics")
-	defer resp.Body.Close()
+	t.Cleanup(func() {
+		require.NoError(t, resp.Body.Close())
+	})
 
 	// Read and parse metrics
 	metrics := new(bytes.Buffer)
@@ -768,7 +774,9 @@ func TestAutoWorkerConfig(t *testing.T) {
 	// Fetch metrics
 	resp, err := http.Get("http://localhost:2999/metrics")
 	require.NoError(t, err, "failed to fetch metrics")
-	defer resp.Body.Close()
+	t.Cleanup(func() {
+		require.NoError(t, resp.Body.Close())
+	})
 
 	// Read and parse metrics
 	metrics := new(bytes.Buffer)
@@ -927,8 +935,9 @@ func testSingleIniConfiguration(tester *caddytest.Tester, key string, value stri
 }
 
 func TestOsEnv(t *testing.T) {
-	os.Setenv("ENV1", "value1")
-	os.Setenv("ENV2", "value2")
+	require.NoError(t, os.Setenv("ENV1", "value1"))
+	require.NoError(t, os.Setenv("ENV2", "value2"))
+
 	tester := caddytest.NewTester(t)
 	tester.InitServer(`
 		{
@@ -1073,9 +1082,11 @@ func TestMaxWaitTimeWorker(t *testing.T) {
 func getStatusCode(url string, t *testing.T) int {
 	req, err := http.NewRequest("GET", url, nil)
 	require.NoError(t, err)
+
 	resp, err := http.DefaultClient.Do(req)
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	require.NoError(t, resp.Body.Close())
+
 	return resp.StatusCode
 }
 
@@ -1134,7 +1145,9 @@ func TestMultiWorkersMetrics(t *testing.T) {
 	// Fetch metrics
 	resp, err := http.Get("http://localhost:2999/metrics")
 	require.NoError(t, err, "failed to fetch metrics")
-	defer resp.Body.Close()
+	t.Cleanup(func() {
+		require.NoError(t, resp.Body.Close())
+	})
 
 	// Read and parse metrics
 	metrics := new(bytes.Buffer)
@@ -1240,7 +1253,9 @@ func TestDisabledMetrics(t *testing.T) {
 	// Fetch metrics
 	resp, err := http.Get("http://localhost:2999/metrics")
 	require.NoError(t, err, "failed to fetch metrics")
-	defer resp.Body.Close()
+	t.Cleanup(func() {
+		require.NoError(t, resp.Body.Close())
+	})
 
 	// Read and parse metrics
 	metrics := new(bytes.Buffer)
@@ -1299,7 +1314,9 @@ func TestWorkerRestart(t *testing.T) {
 
 	resp, err := http.Get("http://localhost:2999/metrics")
 	require.NoError(t, err, "failed to fetch metrics")
-	defer resp.Body.Close()
+	t.Cleanup(func() {
+		require.NoError(t, resp.Body.Close())
+	})
 
 	// Read and parse metrics
 	metrics := new(bytes.Buffer)
