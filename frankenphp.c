@@ -244,8 +244,13 @@ static void frankenphp_reset_session_state(void) {
 }
 #endif
 
+static frankenphp_thread_metrics *thread_metrics = NULL;
+
 /* Adapted from php_request_shutdown */
 static void frankenphp_worker_request_shutdown() {
+  __atomic_store_n(&thread_metrics[thread_index].last_memory_usage,
+                   zend_memory_usage(0), __ATOMIC_RELAXED);
+
   /* Flush all output buffers */
   zend_try { php_output_end_all(); }
   zend_end_try();
@@ -1233,6 +1238,8 @@ int frankenphp_execute_script(char *file_name) {
     sandboxed_env = NULL;
   }
 
+  __atomic_store_n(&thread_metrics[thread_index].last_memory_usage,
+                   zend_memory_usage(0), __ATOMIC_RELAXED);
   php_request_shutdown((void *)0);
   frankenphp_free_request_context();
 
@@ -1404,6 +1411,20 @@ int frankenphp_reset_opcache(void) {
 }
 
 int frankenphp_get_current_memory_limit() { return PG(memory_limit); }
+
+void frankenphp_init_thread_metrics(int max_threads) {
+  thread_metrics = calloc(max_threads, sizeof(frankenphp_thread_metrics));
+}
+
+void frankenphp_destroy_thread_metrics(void) {
+  free(thread_metrics);
+  thread_metrics = NULL;
+}
+
+size_t frankenphp_get_thread_memory_usage(uintptr_t idx) {
+  return __atomic_load_n(&thread_metrics[idx].last_memory_usage,
+                         __ATOMIC_RELAXED);
+}
 
 static zend_module_entry **modules = NULL;
 static int modules_len = 0;
