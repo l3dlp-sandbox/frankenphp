@@ -84,7 +84,6 @@ jobs:
           VERSION: ${{ steps.check.outputs.ref || 'dev' }}
 
   build-linux-musl:
-    environment: dockerhub
     permissions:
       contents: write
       id-token: write
@@ -123,7 +122,7 @@ jobs:
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }} # zizmor: ignore[secrets-outside-env] TODO: drop once super-linter ships zizmor >=1.24.0, then the allowlist in zizmor.yaml takes over
       - name: Set VERSION
         run: |
           if [ "${GITHUB_REF_TYPE}" == "tag" ]; then
@@ -220,7 +219,6 @@ jobs:
           BINARY: ./frankenphp-linux-${{ matrix.platform == 'linux/amd64' && 'x86_64' || 'aarch64' }}${{ matrix.debug && '-debug' || '' }}${{ matrix.mimalloc && '-mimalloc' || '' }}
 
   build-linux-gnu:
-    environment: dockerhub
     permissions:
       contents: write
       id-token: write
@@ -292,7 +290,7 @@ jobs:
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }} # zizmor: ignore[secrets-outside-env] TODO: drop once super-linter ships zizmor >=1.24.0, then the allowlist in zizmor.yaml takes over
       - name: Build
         id: build
         uses: docker/bake-action@v7
@@ -379,7 +377,6 @@ jobs:
 
   # Adapted from https://docs.docker.com/build/ci/github-actions/multi-platform/
   push:
-    environment: dockerhub
     runs-on: ubuntu-24.04
     needs:
       - prepare
@@ -406,7 +403,7 @@ jobs:
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }} # zizmor: ignore[secrets-outside-env] TODO: drop once super-linter ships zizmor >=1.24.0, then the allowlist in zizmor.yaml takes over
       - name: Create manifest list and push
         working-directory: /tmp/metadata
         run: |

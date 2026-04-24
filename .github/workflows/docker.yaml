@@ -80,7 +80,6 @@ jobs:
           VERSION: ${{ (github.ref_type == 'tag' && github.ref_name) || steps.check.outputs.ref || 'dev' }}
           PHP_VERSION: ${{ steps.check.outputs.php_version }}
   build:
-    environment: dockerhub
     runs-on: ${{ startsWith(matrix.platform, 'linux/arm') && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     needs:
       - prepare
@@ -131,7 +130,7 @@ jobs:
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }} # zizmor: ignore[secrets-outside-env] TODO: drop once super-linter ships zizmor >=1.24.0, then the allowlist in zizmor.yaml takes over
       - name: Build
         id: build
         uses: docker/bake-action@v7
@@ -205,7 +204,6 @@ jobs:
 
   # Adapted from https://docs.docker.com/build/ci/github-actions/multi-platform/
   push:
-    environment: dockerhub
     runs-on: ubuntu-24.04
     needs:
       - prepare
@@ -230,7 +228,7 @@ jobs:
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }} # zizmor: ignore[secrets-outside-env] TODO: drop once super-linter ships zizmor >=1.24.0, then the allowlist in zizmor.yaml takes over
       - name: Create manifest list and push
         working-directory: /tmp/metadata
         run: |
